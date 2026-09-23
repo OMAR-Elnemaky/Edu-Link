@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "291225163539",
+    "project_id": "edu-link-42c67",
+    "storage_bucket": "edu-link-42c67.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:291225163539:android:a4e06011660f84cb52ece6",
+        "android_client_info": {
+          "package_name": "com.example.edu_link"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCkPO7mwqLAxGtj1Y1bl3P0AGCJ7SAgj-U"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
