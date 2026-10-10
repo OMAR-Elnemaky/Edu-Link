@@ -31,3 +31,75 @@ ThemeData buildAppTheme() {
     textTheme: GoogleFonts.cairoTextTheme(base.textTheme),
   );
 }
+
+InputDecoration appFieldDecoration(String label, IconData icon, {Widget? suffix}) {
+  OutlineInputBorder border(Color c, [double w = 1.2]) => OutlineInputBorder(
+    borderRadius: BorderRadius.circular(16),
+    borderSide: BorderSide(color: c, width: w),
+  );
+  return InputDecoration(
+    labelText: label,
+    labelStyle: const TextStyle(color: AppColors.textSecondary),
+    prefixIcon: Icon(icon, color: AppColors.primaryLight),
+    suffixIcon: suffix,
+    filled: true,
+    fillColor: AppColors.card,
+    enabledBorder: border(AppColors.cardBorder),
+    focusedBorder: border(AppColors.primaryLight, 2),
+    errorBorder: border(Colors.redAccent),
+    focusedErrorBorder: border(Colors.redAccent, 2),
+  );
+}
+
+Widget primaryButton({
+  required String label,
+  required VoidCallback? onPressed,
+  bool loading = false,
+  IconData? icon,
+}) {
+  return SizedBox(
+    height: 54,
+    width: double.infinity,
+    child: ElevatedButton(
+      onPressed: loading ? null : onPressed,
+      style: ElevatedButton.styleFrom(
+        backgroundColor: AppColors.primary,
+        foregroundColor: Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(27)),
+      ),
+      child: loading
+          ? const SizedBox(
+          width: 24,
+          height: 24,
+          child: CircularProgressIndicator(strokeWidth: 2.5, color: Colors.white))
+          : Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          if (icon != null) ...[Icon(icon), const SizedBox(width: 8)],
+          Text(label, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
+        ],
+      ),
+    ),
+  );
+}
+
+Widget outlinedButtonWidget({
+  required String label,
+  required VoidCallback? onPressed,
+  IconData? icon,
+}) {
+  return SizedBox(
+    height: 54,
+    width: double.infinity,
+    child: OutlinedButton.icon(
+      onPressed: onPressed,
+      icon: Icon(icon ?? Icons.arrow_forward),
+      label: Text(label, style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w700)),
+      style: OutlinedButton.styleFrom(
+        foregroundColor: Colors.white,
+        side: const BorderSide(color: AppColors.primary, width: 1.5),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(27)),
+      ),
+    ),
+  );
+}

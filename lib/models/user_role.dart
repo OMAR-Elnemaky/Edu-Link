@@ -1,8 +1,8 @@
-enum UserRole { student, teacher, parent, admin }
+/// أدوار المستخدمين المتاحة للتسجيل (لا يوجد دور "إدارة" في هذه النسخة)
+enum UserRole { student, teacher, parent }
 
 extension UserRoleX on UserRole {
-  /// القيمة اللي هتتحفظ في Firestore
-  String get value => name;
+  String get value => name; // يُحفظ في Firestore
 
   String get label {
     switch (this) {
@@ -12,8 +12,9 @@ extension UserRoleX on UserRole {
         return 'مدرس';
       case UserRole.parent:
         return 'ولي أمر';
-      case UserRole.admin:
-        return 'إدارة';
     }
   }
+
+  static UserRole fromValue(String v) =>
+      UserRole.values.firstWhere((e) => e.value == v);
 }
