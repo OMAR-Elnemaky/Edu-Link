@@ -51,6 +51,38 @@ InputDecoration appFieldDecoration(String label, IconData icon, {Widget? suffix}
   );
 }
 
+Widget appBackButton(BuildContext context) {
+  return Padding(
+    padding: const EdgeInsets.only(top: 8, right: 8, left: 8),
+    child: Align(
+      alignment: AlignmentDirectional.centerStart,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () => Navigator.pop(context),
+          borderRadius: BorderRadius.circular(16),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+            decoration: BoxDecoration(
+              color: AppColors.card,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: AppColors.cardBorder, width: 1.2),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: const [
+                Icon(Icons.arrow_back_ios_new_rounded, color: AppColors.primaryLight, size: 18),
+                SizedBox(width: 6),
+                Text('رجوع', style: TextStyle(color: AppColors.primaryLight, fontSize: 15, fontWeight: FontWeight.w600)),
+              ],
+            ),
+          ),
+        ),
+      ),
+    ),
+  );
+}
+
 Widget primaryButton({
   required String label,
   required VoidCallback? onPressed,

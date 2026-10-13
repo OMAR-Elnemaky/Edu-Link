@@ -3,8 +3,10 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import '../models/school.dart';
 import '../models/user_role.dart';
+import '../services/school_service.dart';
 import '../theme/app_theme.dart';
 import 'placeholders/role_home_placeholders.dart';
+import 'role_details_screen.dart';
 import 'role_selection_screen.dart';
 import 'school_select_screen.dart';
 import 'welcome_screen.dart';
@@ -26,43 +28,60 @@ class AuthGate extends StatelessWidget {
         if (user == null) return const WelcomeScreen();
 
         return FutureBuilder<DocumentSnapshot<Map<String, dynamic>>>(
-          future: FirebaseFirestore.instance.collection('users').doc(user.uid).get(),
+          future: FirebaseFirestore.instance
+              .collection('users')
+              .doc(user.uid)
+              .get()
+              .timeout(const Duration(seconds: 3)),
           builder: (context, userSnap) {
             if (userSnap.connectionState == ConnectionState.waiting) {
               return const _Loading();
             }
+            if (userSnap.hasError || !userSnap.hasData) {
+              return const WelcomeScreen();
+            }
             final data = userSnap.data?.data();
             if (data == null) return const WelcomeScreen();
 
+            // Step 1: School Selection
             final schoolId = data['schoolId'] as String?;
-            if (schoolId == null) return const SchoolSelectScreen();
+            if (schoolId == null) {
+              return const SchoolSelectScreen();
+            }
 
-            final roleValue = data['role'] as String?;
-            if (roleValue == null) {
-              return FutureBuilder<School?>(
-                future: FirebaseFirestore.instance
-                    .collection('schools')
-                    .doc(schoolId)
-                    .get()
-                    .then((d) => d.exists ? School.fromMap(d.id, d.data()!) : null),
-                builder: (context, schoolSnap) {
-                  if (!schoolSnap.hasData) return const _Loading();
-                  final school = schoolSnap.data;
-                  if (school == null) return const SchoolSelectScreen();
+            // Fetch school object for subsequent steps
+            return FutureBuilder<School?>(
+              future: SchoolService().fetchSchool(schoolId),
+              builder: (context, schoolSnap) {
+                if (schoolSnap.connectionState == ConnectionState.waiting) {
+                  return const _Loading();
+                }
+                final school = schoolSnap.data;
+                if (school == null) return const SchoolSelectScreen();
+
+                // Step 2: Role Selection
+                final roleValue = data['role'] as String?;
+                if (roleValue == null) {
                   return RoleSelectionScreen(school: school);
-                },
-              );
-            }
+                }
+                final role = UserRoleX.fromValue(roleValue);
 
-            final role = UserRoleX.fromValue(roleValue);
-            switch (role) {
-              case UserRole.student:
-                return const StudentHomeScreen();
-              case UserRole.teacher:
-                return const TeacherHomeScreen();
-              case UserRole.parent:
-                return const ParentHomeScreen();
-            }
+                // Step 3: Role Details (Active Status)
+                final status = data['status'] as String?;
+                if (status == null || status != 'active') {
+                  return RoleDetailsScreen(school: school, role: role);
+                }
+
+                switch (role) {
+                  case UserRole.student:
+                    return const StudentHomeScreen();
+                  case UserRole.teacher:
+                    return const TeacherHomeScreen();
+                  case UserRole.parent:
+                    return const ParentHomeScreen();
+                }
+              },
+            );
           },
         );
       },

@@ -66,6 +66,15 @@ class School {
   final String city;
   final SchoolStage stage;
   final List<String> subjects;
+  final String? englishName;
+  final String? partner;
+  final String? description;
+  final List<String> specialties;
+  final int durationYears;
+  final String? studySystem;
+  final String? careerOutlook;
+  final String? logoAssetPath;
+  final List<String> categories;
 
   School({
     required this.id,
@@ -73,13 +82,49 @@ class School {
     required this.city,
     required this.stage,
     required this.subjects,
+    this.englishName,
+    this.partner,
+    this.description,
+    this.specialties = const [],
+    this.durationYears = 3,
+    this.studySystem,
+    this.careerOutlook,
+    this.logoAssetPath,
+    this.categories = const [],
   });
 
   factory School.fromMap(String id, Map<String, dynamic> map) => School(
     id: id,
-    name: map['name'] as String,
-    city: map['city'] as String,
-    stage: SchoolStageX.fromValue(map['stage'] as String),
-    subjects: List<String>.from(map['subjects'] as List),
+    name: map['name'] as String? ?? '',
+    city: map['city'] as String? ?? '',
+    stage: SchoolStageX.fromValue(map['stage'] as String? ?? 'secondary'),
+    subjects: List<String>.from(map['subjects'] as List? ?? []),
+    englishName: map['englishName'] as String?,
+    partner: map['partner'] as String?,
+    description: map['description'] as String?,
+    specialties: List<String>.from(map['specialties'] as List? ?? []),
+    durationYears: map['durationYears'] is int
+        ? map['durationYears'] as int
+        : (int.tryParse(map['durationYears']?.toString() ?? '') ?? 3),
+    studySystem: map['studySystem'] as String?,
+    careerOutlook: map['careerOutlook'] as String?,
+    logoAssetPath: map['logoAssetPath'] as String?,
+    categories: List<String>.from(map['categories'] as List? ?? []),
   );
+
+  Map<String, dynamic> toMap() => {
+    'name': name,
+    'city': city,
+    'stage': stage.value,
+    'subjects': subjects,
+    if (englishName != null) 'englishName': englishName,
+    if (partner != null) 'partner': partner,
+    if (description != null) 'description': description,
+    'specialties': specialties,
+    'durationYears': durationYears,
+    if (studySystem != null) 'studySystem': studySystem,
+    if (careerOutlook != null) 'careerOutlook': careerOutlook,
+    if (logoAssetPath != null) 'logoAssetPath': logoAssetPath,
+    'categories': categories,
+  };
 }

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
-import 'create_account_screen.dart';
 import 'login_screen.dart';
+import 'role_selection_screen.dart';
 
 class WelcomeScreen extends StatelessWidget {
   const WelcomeScreen({super.key});
@@ -57,7 +57,7 @@ class WelcomeScreen extends StatelessWidget {
                     icon: Icons.person_add_alt_1_rounded,
                     onPressed: () => Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (_) => const CreateAccountScreen()),
+                      MaterialPageRoute(builder: (_) => const RoleSelectionScreen()),
                     ),
                   ),
                   const SizedBox(height: 14),

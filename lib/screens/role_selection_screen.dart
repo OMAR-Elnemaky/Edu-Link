@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import '../models/school.dart';
 import '../models/user_role.dart';
+import '../services/auth_service.dart';
 import '../theme/app_theme.dart';
+import 'create_account_screen.dart';
 import 'role_details_screen.dart';
 
 class _RoleInfo {
@@ -22,8 +24,8 @@ const _roles = [
 ];
 
 class RoleSelectionScreen extends StatefulWidget {
-  final School school;
-  const RoleSelectionScreen({super.key, required this.school});
+  final School? school;
+  const RoleSelectionScreen({super.key, this.school});
 
   @override
   State<RoleSelectionScreen> createState() => _RoleSelectionScreenState();
@@ -31,6 +33,39 @@ class RoleSelectionScreen extends StatefulWidget {
 
 class _RoleSelectionScreenState extends State<RoleSelectionScreen> {
   UserRole _selected = UserRole.student;
+  bool _loading = false;
+
+  Future<void> _submit() async {
+    setState(() => _loading = true);
+    try {
+      if (widget.school != null) {
+        await AuthService().saveRole(_selected);
+      }
+      if (!mounted) return;
+
+      if (widget.school != null) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => RoleDetailsScreen(school: widget.school!, role: _selected),
+          ),
+        );
+      } else {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => CreateAccountScreen(role: _selected),
+          ),
+        );
+      }
+    } catch (_) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('حدث خطأ، حاول مرة أخرى')),
+      );
+    } finally {
+      if (mounted) setState(() => _loading = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -40,10 +75,12 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen> {
         child: SafeArea(
           child: Column(
             children: [
-              const SizedBox(height: 8),
-              Text(widget.school.name,
-                  style: const TextStyle(fontSize: 15, color: AppColors.textMuted)),
-              const SizedBox(height: 4),
+              appBackButton(context),
+              if (widget.school != null) ...[
+                Text(widget.school!.name,
+                    style: const TextStyle(fontSize: 15, color: AppColors.textMuted)),
+                const SizedBox(height: 4),
+              ],
               const Text('ما هو دورك؟',
                   style: TextStyle(fontSize: 26, fontWeight: FontWeight.w800, color: Colors.white)),
               const SizedBox(height: 16),
@@ -64,12 +101,8 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen> {
                 padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
                 child: primaryButton(
                   label: 'متابعة',
-                  onPressed: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => RoleDetailsScreen(school: widget.school, role: _selected),
-                    ),
-                  ),
+                  onPressed: _loading ? null : _submit,
+                  loading: _loading,
                 ),
               ),
             ],

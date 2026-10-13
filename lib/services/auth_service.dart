@@ -26,13 +26,27 @@ class AuthService {
   }
 
   // ---------------------------------------------------------------
-  // 1) إنشاء الحساب الأساسي (اسم + عمر + إيميل + باسورد)
+  // 1) التحقق من البيانات محلياً بدون إنشاء حساب في Firebase
   // ---------------------------------------------------------------
   Future<void> createAccount({
     required String name,
     required int age,
     required String email,
     required String password,
+  }) async {
+    // لا يوجد تحقق مسبق — سيظهر الخطأ عند finalizeRegistration إن كان الإيميل مستخدم
+  }
+
+  // ---------------------------------------------------------------
+  // 1b) إنشاء الحساب الفعلي في Firebase بعد اختيار المدرسة
+  // ---------------------------------------------------------------
+  Future<void> finalizeRegistration({
+    required String name,
+    required int age,
+    required String email,
+    required String password,
+    required String schoolId,
+    required UserRole role,
   }) async {
     User user;
     try {
@@ -50,12 +64,12 @@ class AuthService {
         'name': name.trim(),
         'age': age,
         'email': user.email,
+        'role': role.value,
+        'schoolId': schoolId,
         'createdAt': FieldValue.serverTimestamp(),
       });
     } catch (e) {
-      try {
-        await user.delete();
-      } catch (_) {}
+      try { await user.delete(); } catch (_) {}
       throw AuthException('تعذر إنشاء الحساب، حاول مرة أخرى');
     }
   }
@@ -113,11 +127,18 @@ class AuthService {
   }
 
   // ---------------------------------------------------------------
-  // 2) اختيار المدرسة
+  // 2) حفظ الدور واختيار المدرسة
   // ---------------------------------------------------------------
+  Future<void> saveRole(UserRole role) async {
+    final uid = _requireUid();
+    await _db.collection('users').doc(uid).set({
+      'role': role.value,
+    }, SetOptions(merge: true));
+  }
+
   Future<void> selectSchool(String schoolId) async {
     final uid = _requireUid();
-    await _db.collection('users').doc(uid).update({'schoolId': schoolId});
+    await _db.collection('users').doc(uid).set({'schoolId': schoolId}, SetOptions(merge: true));
   }
 
   // ---------------------------------------------------------------

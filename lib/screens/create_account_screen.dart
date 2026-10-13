@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
+import '../models/registration_data.dart';
+import '../models/user_role.dart';
 import '../services/auth_service.dart';
 import '../theme/app_theme.dart';
 import 'school_select_screen.dart';
 
 class CreateAccountScreen extends StatefulWidget {
-  const CreateAccountScreen({super.key});
+  final UserRole? role;
+  const CreateAccountScreen({super.key, this.role});
 
   @override
   State<CreateAccountScreen> createState() => _CreateAccountScreenState();
@@ -28,13 +31,6 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
     super.dispose();
   }
 
-  void _goNext() {
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (_) => const SchoolSelectScreen()),
-    );
-  }
-
   Future<void> _submitEmail() async {
     if (!_formKey.currentState!.validate()) return;
     setState(() => _loading = true);
@@ -46,7 +42,20 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
         password: _password.text,
       );
       if (!mounted) return;
-      _goNext();
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => SchoolSelectScreen(
+            registrationData: RegistrationData(
+              name: _name.text.trim(),
+              age: int.parse(_age.text.trim()),
+              email: _email.text.trim(),
+              password: _password.text,
+              role: widget.role,
+            ),
+          ),
+        ),
+      );
     } on AuthException catch (e) {
       _showError(e.message);
     } finally {
@@ -59,7 +68,10 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
     try {
       await AuthService().signInWithGoogle();
       if (!mounted) return;
-      _goNext();
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => const SchoolSelectScreen()),
+      );
     } on AuthException catch (e) {
       _showError(e.message);
     } finally {
@@ -79,13 +91,7 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
         child: SafeArea(
           child: Column(
             children: [
-              Align(
-                alignment: AlignmentDirectional.centerStart,
-                child: IconButton(
-                  icon: const Icon(Icons.arrow_back_rounded, color: AppColors.primaryLight),
-                  onPressed: () => Navigator.pop(context),
-                ),
-              ),
+              appBackButton(context),
               Expanded(
                 child: SingleChildScrollView(
                   padding: const EdgeInsets.symmetric(horizontal: 24),
